@@ -1,0 +1,100 @@
+clc
+
+% Definition des constantes de l'exercice
+Deff = 10*10^(-10);  
+S = 2*10^(-8);
+Ce = 20; 
+D = 1;
+Ntot = 5; 
+Rayon = D /2;
+alpha = S / Deff;
+
+% Calcul du Dx
+dr = Rayon / (Ntot - 1);
+
+%Definition des matrices A C = B
+
+A = zeros(Ntot-1,Ntot-1);
+
+B = zeros(Ntot-1,1);
+
+disp(A);
+
+disp(B);
+
+%Definition des conditions limites 
+%C(Ntot,1) = Ce;  CNtot = Ce car Ntot est le noeud extérieur en contact avec le sel
+% C(1,1)= C(2,1); Flux nul au centre du pilier donc --> C0 = C1
+
+%Placer l'equation CN (analytique) dans la matrice
+A(Ntot-1,Ntot-1) = 1;
+B(Ntot-1,1) = Ce;
+
+
+disp(C);
+
+%Remplissage de A
+
+%Placer l'equation C1 (analytique) dans la matrice, car impacté par CL
+A(1,1) = -2;
+A(1,2) = 2; 
+
+%Placer l'equation CN-1 (analytique) dans la matrice, car impacté par CL
+A(Ntot - 2, Ntot -3) = Ntot-2;
+A(Ntot - 2, Ntot -2) = -(2*(Ntot-2)+1);
+
+
+for i=2:Ntot-3
+   
+    
+A(i, i +1) = 1 + i;
+A(i, i) = -(2*i +1);
+A(i, i-1) = i;
+
+end 
+
+disp(A);
+
+
+%Remplissage de B
+
+for i=1:Ntot-2
+B(i,1)= alpha * dr * dr * (i);
+
+if i==Ntot-2
+B(i,1)= alpha * dr * dr * (i)-4*Ce;
+end
+
+end
+
+disp(B);
+
+
+disp(A);
+
+disp(B);
+
+C = A\B; 
+
+disp(C);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Définir les positions du rayon r
+r = linspace(0, Rayon, Ntot-1);
+
+% Calculer la solution analytique
+C_analytic = (1/4) * (S / Deff) * Rayon^2 * ((r.^2 / Rayon^2) - 1) + Ce;
+
+% Tracer la comparaison
+figure;
+plot(r, C, '-o', 'DisplayName', 'Résultat Numérique');
+hold on;
+plot(r, C_analytic, '-x', 'DisplayName', 'Résultat Analytique');
+xlabel('Rayon r (m)');
+ylabel('Concentration C (mol/m^3)');
+title('Comparaison entre les résultats numériques et analytiques');
+legend('show');
+grid on;
+
