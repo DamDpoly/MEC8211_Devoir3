@@ -7,7 +7,8 @@ Les paramètres liés aux dimensions du pilier et aux concentrations de sels
 sont constants.
 %}
 
-
+%Ce code utilise des schémas d'approximations des dérivées de premier ordre
+%pour résoudre l'EDP.
 clc
 
 % Definition des constantes de l'exercice
@@ -29,70 +30,84 @@ dr = Rayon / (Ntot - 1);
 A = zeros(Ntot-2,Ntot-2);
 
 B = zeros(Ntot-2,1);
-
-disp(A);
-
-disp(B);
     
-
 %Remplissage de A
 
-for i = 1:Ntot-2
+%Condition limite C1 = C0
 
-    if i == 1 % Nécéssité d'une condition If pour séparer le cas global de la condition limite C1 = C0
-        A(i, 1) = i -(2*i+1); % Coefficient pour C_i-1
+A(1, 1) = 1 -(2*1+1); % Coefficient pour A_[1,1]
+A(1, 1+1) = 1 + 1; % Coefficient pour A_[1,2]
+
+%Condition limite CN-1 = CE
+
+ A(Ntot-2,Ntot-2-1) = Ntot-2; % Coefficient pour A_[Ntot-2,Ntot-3]
         
-    else 
-        A(i,i-1) = i;
+ A(Ntot-2, Ntot-2) = - (2*(Ntot-2) + 1); % Coefficient pour A_[Ntot-2,Ntot-2]
         
-        A(i, i) = - (2*i + 1); % Coefficient pour C_i
+%Boucle de remplissage de A
+     
+for i = 2:Ntot-3
+
+ 
+        A(i,i-1) = i;       % Coefficient pour A_[i,i-1]
         
-    end
-    
-    if i < Ntot-2 % Nécéssité d'une condition If pour séparer le cas global de la condition C_N-1 = CE où le terme en C_i+1 est absent de la matrice A car envoyé dans le second membre B 
-        A(i, i+1) = i + 1; % Coefficient pour C_i+1
+        A(i, i) = - (2*i + 1); % Coefficient pour A_[i,i]
         
-    end
-    
+        A(i, i+1) = i + 1; % Coefficient pour A_[i,i+1]
+        
 end
 
+
+fprintf('Matrice A :\n');
 disp(A);
 
 
 %Remplissage de B
 
-for i=1:Ntot-2
+%Condition limite CN-1 = CE avec CE transféré au second membre
+
+B(Ntot-2,1)= alpha * dr * dr * (Ntot-2)-(Ntot-1)*Ce;
+
+% Boucle de remplissage de B
+
+for i=1:Ntot-3
 B(i,1)= alpha * dr * dr * (i); % Cas global 
-
-if i==Ntot-2
-B(i,1)= alpha * dr * dr * (i)-(Ntot-1)*Ce; % Cas pour le dernier terme de la matrice affecté par la condition C_N-1 = CE
-
 end
 
-end
-
+fprintf('Matrice B :\n');
 disp(B);
+
+% Résolution du système 
 
 C = A\B; 
 
+% Concaténation des résultats calculés avec ceux des conditions limites
+
 C = [C(1); C; Ce];
 
-disp(C);
+fprintf('Les concentrations calculées numériquement sont les suivantes :\n ');
+for i = 1:length(C)
+    fprintf('C%d : %.4f  ', i-1, C(i));
+end
 
 
 % Définition de la position de chaque noeuds dans le vecteur r
 r = linspace(0, Rayon, Ntot);
 
 % Calcul de la concentration avec la solution analytique
-C_analytic = (1/4) * (alpha) * Rayon^(2) * ((r.^(2) / Rayon^(2)) - 1) + Ce;
+C_analytique = (1/4) * (alpha) * Rayon^(2) * ((r.^(2) / Rayon^(2)) - 1) + Ce;
 
-disp(C_analytic);
+fprintf('\n Les concentrations calculées analytiquement sont les suivantes :\n ');
+for i = 1:length(C)
+    fprintf('C%d : %.4f  ', i-1, C_analytique(i));
+end
 
-% Tracer de la comparaison des concentrations analytiques et numériques
+
+% Tracé de la comparaison des concentrations analytiques et numériques
 figure;
 plot(r, C, '-o', 'DisplayName', 'Résultat Numérique');
 hold on;
-plot(r, C_analytic, '-x', 'DisplayName', 'Résultat Analytique');
+plot(r, C_analytique, '-x', 'DisplayName', 'Résultat Analytique');
 xlabel('Rayon r (m)');
 ylabel('Concentration C (mol/m^3)');
 title('Comparaison entre les résultats numériques et analytiques');
