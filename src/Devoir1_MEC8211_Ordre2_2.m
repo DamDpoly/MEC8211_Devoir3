@@ -82,8 +82,8 @@ disp(B);
 C = A\B; 
 
 % Concaténation des résultats calculés avec ceux des conditions limites
-
-C = [C(1); C; Ce];
+C0 = -(1/3)*(C(2)-4*C(1));
+C = [C0; C; Ce];
 
 fprintf('Les concentrations calculées numériquement sont les suivantes :\n ');
 for i = 1:length(C)
