@@ -26,8 +26,8 @@ function [C, C_analytique, r, dr] = Solution_numerique_schema_2(Ntot)
     % Remplissage de la matrice A
     
     % Condition limite C1 = C0
-    A(1, 1) = (1-0.5) - (2*1);
-    A(1, 2) = 1 + 0.5;
+    A(1, 1) = -(2*1)+((1/2)*(1/3))*4;
+    A(1, 2) = (1 + 0.5)-((1/2)*(1/3));
     
     % Condition limite CN-1 = CE
     A(Ntot-2, Ntot-3) = (Ntot-2) - 0.5;
