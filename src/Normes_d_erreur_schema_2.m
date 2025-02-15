@@ -36,7 +36,7 @@ semilogy(dr(5:Nmax), L2_error(5:Nmax), 'b', 'DisplayName', 'Norme L2');
 semilogy(dr(5:Nmax), Linf_error(5:Nmax), 'g', 'DisplayName', 'Norme L∞');
 set(gca, 'XScale', 'log');
 legend('show');
-xlabel('\Delta x [m]');
+xlabel('\Delta r [m]');
 ylabel('Erreur L1/L2/Linf [mol/m^3]');
 title("Normes d'erreur pour la solution numérique du deuxième schéma");
 grid on;
