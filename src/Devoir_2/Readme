@@ -1,4 +1,5 @@
-Le code Graphique_solution_transitoire montre l'évolution de la concentration en fonction du temps
+Le code Graphique_solution_transitoire montre l'évolution de la concentration en fonction du temps.
 
 Le code Normes_d_erreur utilise la fonction Solution_transitoire_numérique pour évaluer les erreurs L1, L2 et Linf. 
 
+Le code Calcul_Symbolique_MMS.py calcule la solution manufacturée et le terme source.
