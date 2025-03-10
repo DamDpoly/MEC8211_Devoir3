@@ -1,5 +1,5 @@
-# MEC8211_Devoir1
- Script pour le devoir 1 du cours MEC8211
+# MEC8211_Devoir2
+ Script pour le devoir 2 du cours MEC8211
 
 Instructions:
 
