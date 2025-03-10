@@ -5,7 +5,6 @@ function [C_full] = Solution_transitoire_numerique(Ntot, dt, tmax)
     Ce = 20;          
     D = 1;            
     Rayon = D / 2;   
-    alpha = S / Deff; 
     k = 4 * 10^(-9);  
     lambda = 1;
 
@@ -13,11 +12,11 @@ function [C_full] = Solution_transitoire_numerique(Ntot, dt, tmax)
     dr = Rayon / (Ntot - 1); % Pas d'espace (m)
 
     % Discrétisation du temps
-    t0 = 0; % t départ (s)      
-    tend = tmax; % t final (s)
+    t0 = 0;  
+    tend = tmax; 
 
     % Nouvelle condition initiale avec la MMS 
-    C = zeros(Ntot-2, 1);  % Preallocate C array
+    C = zeros(Ntot-2, 1); 
     for i = 1 : Ntot-2
         C(i) = ((i*dr)/Rayon)^2*(Ce + 1) - 1;
     end
@@ -30,15 +29,15 @@ function [C_full] = Solution_transitoire_numerique(Ntot, dt, tmax)
         
         % Boucle de remplissage des matrices A et B
         for i = 1:Ntot-2
-            % Terme source MMS avec utilisation correcte de t
+            % Terme source MMS
             S_i = (Ce + exp(-lambda * t)) * (k * ((i * dr) / Rayon)^2 - Deff * (4 / Rayon^2)) + lambda * exp(-lambda * t) * (1 - ((i * dr) / Rayon)^2 - k / lambda);
             
-            if i == 1 % Condition limite pour le cas i = 1 impacté par la condition limite sur C0
+            if i == 1 % Condition limite de Neumann
                 A(i, i) = 1 + Deff * dt * (2 / dr^2) + dt * k;
                 A(i, i+1) = -Deff * dt * (1.5 / dr^2);
                 B(i) = C(i) + Deff * dt * ((i - 0.5) / (dr^2 * i)) * C(i) + dt * S_i;
             
-            elseif i == Ntot-2 % Condition limite au bord
+            elseif i == Ntot-2 % Condition limite de Dirichlet
                 A(i, i-1) = -Deff * dt * ((i - 0.5) / (dr^2 * i));
                 A(i, i) = 1 + Deff * dt * (2 * i / (dr^2 * i)) + dt * k;
                 B(i) = C(i) + Deff * dt * ((i + 0.5) / (dr^2 * i)) * Ce + dt * S_i;
