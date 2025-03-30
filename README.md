@@ -3,7 +3,8 @@
 
 Instructions:
 
-	Le code MATLAB est scindé en plusieurs parties. 
+Le code MATLAB est scindé en plusieurs parties. 
+
 Les fichiers "Simulation_LBM_Convergence.m", "Simulation_LBM_Porosite.m" et 
 "Simulation_LBM_Diametre_fibres.m" appellent les codes "Generate_sample.m" et 
 "LBM.m" afin de simuler la perméabilité d'un milieu filtrant sur une large gamme
