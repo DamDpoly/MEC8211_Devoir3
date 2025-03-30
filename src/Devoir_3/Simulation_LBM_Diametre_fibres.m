@@ -90,7 +90,7 @@ subplot(2, 2, 2);
 histogram(fiber_d_values, 20, 'Normalization', 'pdf', 'EdgeColor', 'k', 'FaceColor', [0.7, 0.7, 0.7]);
 hold on;
 x_fiber_d = linspace(min(fiber_d_values), max(fiber_d_values), 1000);
-pdf_fiber_d_vals = pdf(params_fiber_d, x_fiber_d);  % Calcul de la PDF pour fiber_d_values
+pdf_fiber_d_vals = pdf(params_fiber_d, x_fiber_d);
 plot(x_fiber_d, pdf_fiber_d_vals, 'g-', 'LineWidth', 2);
 title('PDF du diamètre des fibres');
 xlabel('Diamètre des fibres (microns)');
