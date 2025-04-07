@@ -1,0 +1,95 @@
+clear;
+
+% --- Définition des constantes ---
+D = 0.05;           % Diamètre du pilier (m)
+Longueur = 1;       % Longueur du pilier (m)
+k_cuivre = 385;     % Conductivité thermique (W/m.K)
+h = 20;             % Coefficient d'échange thermique (W/m².K)
+T_inf = 25;         % Température ambiante (°C)
+Tm = 100;           % Température à la base (°C)
+
+Rayon = D / 2;
+
+% Paramètres pour erreur en fonction de dt
+dt_values = 1e8:1e8:1e10;
+tmax = 1e11;
+
+% Fonction solution exacte (à adapter si nécessaire)
+C_exact = @(x, t) T_inf + (Tm - T_inf) * cosh((h * pi * D) / (k_cuivre * (pi * D^2 / 4)) * (Longueur - x)) ./ ...
+                            cosh((h * pi * D) / (k_cuivre * (pi * D^2 / 4)) * Longueur);
+
+% --- Erreur en fonction de dr ---
+Ntot_values = 5:1:100;
+dr_values = Longueur ./ (Ntot_values - 1);
+
+L1_error_dr = [];
+L2_error_dr = [];
+Linf_error_dr = [];
+
+for idx = 1:length(Ntot_values)
+    Ntot = Ntot_values(idx);
+    
+    (T_numerique, T_analytique) = Solution_numerique_ailette[D, Longueur, k_cuivre, h, T_inf, Tm, Ntot]
+
+    dx = dr_values(idx);
+    error = abs(T_num - T_ana');
+
+    L1 = sum(error) * dx;
+    L2 = sqrt(sum(error.^2) * dx);
+    Linf = max(error);
+
+    L1_error_dr = [L1_error_dr, L1];
+    L2_error_dr = [L2_error_dr, L2];
+    Linf_error_dr = [Linf_error_dr, Linf];
+end
+
+% --- Affichage erreur en fonction de dr ---
+figure;
+loglog(dr_values, L1_error_dr, 'o-', 'LineWidth', 2, 'DisplayName', 'Norme L1');
+hold on;
+loglog(dr_values, L2_error_dr, 's-', 'LineWidth', 2, 'DisplayName', 'Norme L2');
+loglog(dr_values, Linf_error_dr, '^-', 'LineWidth', 2, 'DisplayName', 'Norme Linf');
+xlabel('dx (Échelle Log)');
+ylabel('Erreur (Échelle Log)');
+title('Erreurs (L1, L2, Linf) en fonction de dx');
+legend show;
+grid on;
+
+% --- Erreur en fonction de dt ---
+L1_error_dt = [];
+L2_error_dt = [];
+Linf_error_dt = [];
+
+Ntot = 100;
+dx = Longueur / (Ntot - 1);
+
+for dt = dt_values
+    [T_num, T_ana] = Solution_numerique_ailette(D, Longueur, k_cuivre, h, T_inf, Tm, Ntot);
+
+    error = abs(T_num - T_ana');
+
+    L1 = sum(error) * dx;
+    L2 = sqrt(sum(error.^2) * dx);
+    Linf = max(error);
+
+    L1_error_dt = [L1_error_dt, L1];
+    L2_error_dt = [L2_error_dt, L2];
+    Linf_error_dt = [Linf_error_dt, Linf];
+end
+
+% --- Affichage erreur en fonction de dt ---
+figure;
+loglog(dt_values, L1_error_dt, 'o-', 'LineWidth', 2, 'DisplayName', 'Norme L1');
+hold on;
+loglog(dt_values, L2_error_dt, 's-', 'LineWidth', 2, 'DisplayName', 'Norme L2');
+loglog(dt_values, Linf_error_dt, '^-', 'LineWidth', 2, 'DisplayName', 'Norme Linf');
+xlabel('dt (Échelle Log)');
+ylabel('Erreur (Échelle Log)');
+title('Erreurs (L1, L2, Linf) en fonction de dt');
+legend show;
+grid on;
+
+
+
+
+
