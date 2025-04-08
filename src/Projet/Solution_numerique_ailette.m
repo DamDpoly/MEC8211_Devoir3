@@ -1,4 +1,4 @@
-function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numerique_ailette(D, Longueur, k_cuivre, h, T_inf, Tm, Ntot)
+function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numerique_ailette(D, L, k_cuivre, h, T_inf, Tm, Ntot)
     %{
         Cette fonction résout l'équation de diffusion de la chaleur dans une ailette cylindrique
         selon un modèle stationnaire. Elle retourne la solution numérique et la solution analytique
@@ -20,7 +20,7 @@ function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numer
     m = (h * P) / (k_cuivre * Ac);     % Coefficient
 
     % Discrétisation spatiale
-    dx = Longueur / (Ntot - 1);
+    dx = L / (Ntot - 1);
 
     % Initialisation des matrices A et B
     A = zeros(Ntot-2, Ntot-2); 
@@ -53,10 +53,10 @@ function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numer
     T_numerique = [Tm; T; T4];
 
     % Coordonnées des nœuds
-    x = linspace(0, Longueur, Ntot);
+    x = linspace(0, L, Ntot);
 
     % Solution analytique
-    T_analytique = T_inf + (Tm - T_inf) * cosh(m * (Longueur - x)) / cosh(m * Longueur);
+    T_analytique = T_inf + (Tm - T_inf) * cosh(m * (L - x)) / cosh(m * L);
 
     % --- Flux de chaleur ---
     % Calcul du flux de chaleur numérique à x=0 avec une différence avant de premier ordre
@@ -71,13 +71,13 @@ function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numer
     q_numerique = -k_cuivre * Ac * gradT_x0_num;  % Flux de chaleur à x=0
     
     % Calcul du flux de chaleur analytique
-    syms x m L
-    T_expr = T_inf + (Tm - T_inf) * cosh(m * (L - x)) / cosh(m * L);
+    syms x m k
+    T_expr = T_inf + (Tm - T_inf) * cosh(m * (k - x)) / cosh(m * k);
     dTdx = diff(T_expr, x);
 
     % Calcul de m et évaluation de la dérivée symbolique en x=0
     m_val = (h * P) / (k_cuivre * Ac);
-    gradT_x0_ana = double(subs(dTdx, [x, m, L], [0, m_val, Longueur]));
+    gradT_x0_ana = double(subs(dTdx, [x, m, k], [0, m_val, L]));
     q_analytique = -k_cuivre * Ac * gradT_x0_ana;
 
 end
