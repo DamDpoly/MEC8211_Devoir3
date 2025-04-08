@@ -1,4 +1,4 @@
-function [T_numerique, T_analytique, q_num, q_ana] = Solution_numerique_ailette(D, Longueur, k_cuivre, h, T_inf, Tm, Ntot)
+function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numerique_ailette(D, Longueur, k_cuivre, h, T_inf, Tm, Ntot)
     %{
         Cette fonction résout l'équation de diffusion de la chaleur dans une ailette cylindrique
         selon un modèle stationnaire. Elle retourne la solution numérique et la solution analytique
@@ -59,15 +59,16 @@ function [T_numerique, T_analytique, q_num, q_ana] = Solution_numerique_ailette(
     T_analytique = T_inf + (Tm - T_inf) * cosh(m * (Longueur - x)) / cosh(m * Longueur);
 
     % --- Flux de chaleur ---
-    % Calcul du flux de chaleur numérique à x=0
+    % Calcul du flux de chaleur numérique à x=0 avec une différence avant de premier ordre
     T0 = T_numerique(1);  % Température en x=0 (T_0)
     T1 = T_numerique(2);  % Température en x=dx (T_1)
-    T2 = T_numerique(3);  % Température en x=2*dx (T_2)
-    gradT_x0_num = (-3*T0 + 4*T1 - T2) / (2*dx);  % Approximation de la différence centrale
+    
+    % Approximation de la différence avant (forward difference) de premier ordre
+    gradT_x0_num = (T1 - T0) / dx;  % First-order forward difference
 
     % Calcul du flux de chaleur à x=0 en utilisant la loi de Fourier
     Ac = (pi() * D^2) / 4;   % Aire de la section transversale de l'ailette
-    q_num = -k_cuivre * Ac * gradT_x0_num;  % Flux de chaleur à x=0
+    q_numerique = -k_cuivre * Ac * gradT_x0_num;  % Flux de chaleur à x=0
     
     % Calcul du flux de chaleur analytique
     syms x m L
@@ -75,12 +76,8 @@ function [T_numerique, T_analytique, q_num, q_ana] = Solution_numerique_ailette(
     dTdx = diff(T_expr, x);
 
     % Calcul de m et évaluation de la dérivée symbolique en x=0
-    P = pi * D;
     m_val = (h * P) / (k_cuivre * Ac);
     gradT_x0_ana = double(subs(dTdx, [x, m, L], [0, m_val, Longueur]));
-    q_ana = -k_cuivre * Ac * gradT_x0_ana;
+    q_analytique = -k_cuivre * Ac * gradT_x0_ana;
 
-    % Affichage des résultats
-    fprintf('Flux de chaleur numérique à x = 0 : %.3f W\n', q_num);
-    fprintf('Flux de chaleur analytique à x = 0 : %.3f W\n', q_ana);
 end
