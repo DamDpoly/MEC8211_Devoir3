@@ -1,10 +1,10 @@
 clear;
 
 % --- Définition des constantes ---
-D = 1;             % Diamètre du pilier (m)
+D = 0.5;             % Diamètre du pilier (m)
 L = 1;               % Longueur du pilier (m)
-k = 10;             % Conductivité thermique (W/m.K)
-h = 20;             % Coefficient d'échange thermique (W/m².K)
+k = 385;             % Conductivité thermique (W/m.K)
+h = 100;             % Coefficient d'échange thermique (W/m².K)
 T_inf = 25;          % Température ambiante (°C)
 Tm = 100;            % Température à la base (°C)
 
@@ -13,7 +13,7 @@ Bi = (h * D) / k;    % Nombre de Biot
 
 
 % Valeurs de Ntot pour les quatres profils de concentration
-Ntot_values = [5, 10, 15, 1000];
+Ntot_values = [5, 10, 15, 5000];
 dx_values = L ./ (Ntot_values - 1);
 
 figure;
@@ -47,7 +47,7 @@ end
 sgtitle('Profils de température et flux de chaleur pour différentes valeurs de Ntot');
 
 % --- Calcul des erreurs pour les profils de température et les flux de chaleur ---
-Ntot_values = 5:1:200;
+Ntot_values = 5:5:2000;
 
 dx_values = L ./ (Ntot_values - 1);
 

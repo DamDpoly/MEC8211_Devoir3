@@ -76,7 +76,7 @@ function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numer
     dTdx = diff(T_expr, x);
 
     % Calcul de m et évaluation de la dérivée symbolique en x=0
-    m_val = sqrt((h * P) / (k_cuivre * Ac));
+    m_val = (h * P) / (k_cuivre * Ac);
     gradT_x0_ana = double(subs(dTdx, [x, m, k], [0, m_val, L]));
     q_analytique = -k_cuivre * Ac * gradT_x0_ana;
 
