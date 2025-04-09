@@ -1,4 +1,4 @@
-function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numerique_ailette(D, L, k_cuivre, h, T_inf, Tm, Ntot)
+function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numerique_ailette(D, L, k, h, T_inf, Tm, Ntot)
     %{
         Cette fonction résout l'équation de diffusion de la chaleur dans une ailette cylindrique
         selon un modèle stationnaire. Elle retourne la solution numérique et la solution analytique
@@ -17,7 +17,7 @@ function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numer
     % Calcul des paramètres géométriques
     P = pi() * D;                      % Périmètre (m)
     Ac = (pi() * D^2) / 4;             % Aire de section transversale (m²)
-    m = sqrt((h * P) / (k_cuivre * Ac));     % Coefficient
+    m = sqrt((h * P) / (k * Ac));     % Coefficient
 
     % Discrétisation spatiale
     dx = L / (Ntot - 1);
@@ -68,16 +68,16 @@ function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numer
 
     % Calcul du flux de chaleur à x=0 en utilisant la loi de Fourier
     Ac = (pi() * D^2) / 4;   % Aire de la section transversale de l'ailette
-    q_numerique = -k_cuivre * Ac * gradT_x0_num;  % Flux de chaleur à x=0
+    q_numerique = -k * Ac * gradT_x0_num;  % Flux de chaleur à x=0
     
     % Calcul du flux de chaleur analytique
-    syms x m k
-    T_expr = T_inf + (Tm - T_inf) * cosh(m * (k - x)) / cosh(m * k);
+    syms x m y
+    T_expr = T_inf + (Tm - T_inf) * cosh(m * (y - x)) / cosh(m * y);
     dTdx = diff(T_expr, x);
 
     % Calcul de m et évaluation de la dérivée symbolique en x=0
-    m_val = sqrt((h * P) / (k_cuivre * Ac));
-    gradT_x0_ana = double(subs(dTdx, [x, m, k], [0, m_val, L]));
-    q_analytique = -k_cuivre * Ac * gradT_x0_ana;
+    m_val = sqrt((h * P) / (k * Ac));
+    gradT_x0_ana = double(subs(dTdx, [x, m, y], [0, m_val, L]));
+    q_analytique = -k * Ac * gradT_x0_ana;
 
 end

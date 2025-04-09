@@ -1,6 +1,6 @@
 function [L1_error_T, L2_error_T, Linf_error_T, Erreur_q] = Calcul_normes_erreur(D, L, k, h, T_inf, Tm, Ntot_values)
     % --- Erreur en fonction de la discrétisation spatiale ---
-    dx_values = L ./ (Ntot_values - 1);  % Just used for plotting and integration
+    dx_values = L ./ (Ntot_values - 1);
 
     % Initializing error arrays for temperature (T) and heat flux (q)
     L1_error_T = zeros(length(Ntot_values), 1);
