@@ -20,7 +20,8 @@ function [T_FEM, q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, H, num_z, f
     % Conditions aux limites
     model.EdgeBC(2) = edgeBC(Temperature=Tm);  % Condition limite de température sur le bord 2
     model.EdgeLoad(3) = edgeLoad(ConvectionCoefficient=h, AmbientTemperature=T_inf);  % Convection sur le bord 3
-    
+    model.EdgeLoad(4) = edgeLoad(ConvectionCoefficient=h, AmbientTemperature=T_inf);  % Convection sur le bord 4
+
     % Générer le maillage
     model = generateMesh(model, 'Hmax', H);
     
@@ -36,6 +37,10 @@ function [T_FEM, q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, H, num_z, f
         pdeplot(result.Mesh, XYData=T, Contour="on");
         axis equal;
         title("Température à l'état stationnaire");
+        figure;
+        pdeplot(model.Mesh);
+        axis equal;
+        title("Maillage FEM");
     end
     
     % Stocker les coordonnées des nœuds et les températures dans le maillage
@@ -44,7 +49,7 @@ function [T_FEM, q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, H, num_z, f
     % Définir les positions des tranches axiales (valeurs z pour la moyenne)
     z = linspace(0, L, num_z);
     T_FEM = zeros(length(z), 1);
-    tolerance = 1e-3;
+    tolerance = 1e-4;
     
     % Boucle sur chaque tranche z
     for i = 1:length(z)

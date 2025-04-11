@@ -1,83 +1,68 @@
 function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numerique_ailette(D, L, k, h, T_inf, Tm, Ntot)
-    %{
-        Cette fonction résout l'équation de diffusion de la chaleur dans une ailette cylindrique
-        selon un modèle stationnaire. Elle retourne la solution numérique et la solution analytique
-        ainsi que les flux de chaleur numérique et analytique.
+    % Geometry and physical parameters
+    P = pi * D;                       
+    Ac = (pi * D^2) / 4;             
+    m = sqrt((h * P) / (k * Ac));     
 
-        Paramètres :
-        D         - Diamètre du pilier (m)
-        Longueur  - Longueur du pilier (m)
-        k_cuivre  - Conductivité thermique du cuivre (W/m.K)
-        h         - Coefficient de transfert thermique (W/m².K)
-        T_inf     - Température ambiante (°C)
-        Tm        - Température à l’entrée du pilier (°C)
-        Ntot      - Nombre total de nœuds pour la discrétisation spatiale
-    %}
-
-    % Calcul des paramètres géométriques
-    P = pi() * D;                      % Périmètre (m)
-    Ac = (pi() * D^2) / 4;             % Aire de section transversale (m²)
-    m = sqrt((h * P) / (k * Ac));     % Coefficient
-
-    % Discrétisation spatiale
     dx = L / (Ntot - 1);
+    x = linspace(0, L, Ntot);
 
-    % Initialisation des matrices A et B
-    A = zeros(Ntot-2, Ntot-2); 
-    B = zeros(Ntot-2, 1);       
+    % Initialize matrix A and RHS B
+    A = zeros(Ntot);
+    B = zeros(Ntot, 1);
 
-    % Remplissage de la matrice A
-    A(1, 1) = (-m^2 * dx^2) - 2; 
-    A(1, 2) = 1;
+    % --- Dirichlet BC at x = 0 ---
+    A(1, 1) = 1;
+    B(1) = Tm;
 
-    for i = 2:Ntot-3
+    % --- Interior nodes ---
+    for i = 2:Ntot-1
         A(i, i-1) = 1;
-        A(i, i) = (-m^2 * dx^2) - 2;
+        A(i, i)   = -2 - m^2 * dx^2;
         A(i, i+1) = 1;
-    end
-
-    A(Ntot-2, Ntot-3) = 2/3;
-    A(Ntot-2, Ntot-2) = (4/3) - m^2 * dx^2 - 2;
-
-    % Remplissage de la matrice B
-    B(1) = (-m^2 * dx^2 * T_inf) - Tm;
-    for i = 2:Ntot-2
         B(i) = -m^2 * dx^2 * T_inf;
     end
 
-    % Résolution du système
-    T = A \ B; 
+    % --- Neumann BC at x = L ---
+    % dT/dx = -h/k * (T - T_inf)
+    % Use backward difference: (3T_N - 4T_{N-1} + T_{N-2}) / (2dx) = -h/k (T_N - T_inf)
 
-    % Ajout des conditions limites
-    T4 = (1/3)*(4*T(end) - T(end-1)); % Gear retardé
-    T_numerique = [Tm; T; T4];
+    A(Ntot, Ntot-2) = 1 / (2*dx);
+    A(Ntot, Ntot-1) = -4 / (2*dx);
+    A(Ntot, Ntot)   = 3 / (2*dx) + h / k;
+    B(Ntot) = (h / k) * T_inf;
 
-    % Coordonnées des nœuds
-    x = linspace(0, L, Ntot);
+    % Solve the linear system
+    T_numerique = A \ B;
 
-    % Solution analytique
-    T_analytique = T_inf + (Tm - T_inf) * cosh(m * (L - x)) / cosh(m * L);
+    % --- Analytical Solution ---
+    T_analytique = T_inf + (Tm - T_inf) * ...
+        (((h / (k * m)) * sinh(m * (L - x)) + cosh(m * (L - x))) / ...
+         ((h / (k * m)) * sinh(m * L) + cosh(m * L)));
 
-    % --- Flux de chaleur ---
-    % Calcul du flux de chaleur numérique à x=0 avec une différence avant de premier ordre
-    T0 = T_numerique(1);  % Température en x=0 (T_0)
-    T1 = T_numerique(2);  % Température en x=dx (T_1)
-    
-    % Approximation de la différence avant (forward difference) de premier ordre
-    gradT_x0_num = (T1 - T0) / dx;  % First-order forward difference
+    % --- Heat Flux at x = 0 ---
+    T0 = T_numerique(1);
+    T1 = T_numerique(2);
+    gradT_x0_num = (T1 - T0) / dx;
+    q_numerique = -k * Ac * gradT_x0_num;
 
-    % Calcul du flux de chaleur à x=0 en utilisant la loi de Fourier
-    Ac = (pi() * D^2) / 4;   % Aire de la section transversale de l'ailette
-    q_numerique = -k * Ac * gradT_x0_num;  % Flux de chaleur à x=0
-    
-    % Calcul du flux de chaleur analytique
-    syms x m y
-    T_expr = T_inf + (Tm - T_inf) * cosh(m * (y - x)) / cosh(m * y);
-    dTdx = diff(T_expr, x);
+    % --- Analytical heat flux (symbolic) ---
+    syms xs ms ys T_infs Tms hs ks real
 
-    % Calcul de m et évaluation de la dérivée symbolique en x=0
-    m_val = sqrt((h * P) / (k * Ac));
-    gradT_x0_ana = double(subs(dTdx, [x, m, y], [0, m_val, L]));
+    % Symbolic expression for temperature
+    T_symb_expr = T_infs + (Tms - T_infs) * ...
+        (((hs / (ks * ms)) * sinh(ms * (ys - xs)) + cosh(ms * (ys - xs))) / ...
+         ((hs / (ks * ms)) * sinh(ms * ys) + cosh(ms * ys)));
+
+    % Derivative of T w.r.t. x
+    dTdx = diff(T_symb_expr, xs);
+
+    % Evaluate at x = 0
+    gradT_x0_ana = double(subs(dTdx, ...
+        [xs,    ms,  ys,   T_infs, Tms,  hs,  ks], ...
+        [0,     m,   L,    T_inf,  Tm,   h,   k]));
+
+    % Fourier's law to compute analytical heat flux at x = 0
     q_analytique = -k * Ac * gradT_x0_ana;
-
+    
 end

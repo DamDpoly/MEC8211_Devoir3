@@ -1,10 +1,10 @@
 clear;
 
 % --- Définition des constantes ---
-D = 0.05;             % Diamètre du pilier (m)
+D = 0.5;             % Diamètre du pilier (m)
 L = 1;               % Longueur du pilier (m)
 k = 385;             % Conductivité thermique (W/m.K)
-h = 50;             % Coefficient d'échange thermique (W/m².K)
+h = 500;             % Coefficient d'échange thermique (W/m².K)
 T_inf = 25;          % Température ambiante (°C)
 Tm = 100;            % Température à la base (°C)
 

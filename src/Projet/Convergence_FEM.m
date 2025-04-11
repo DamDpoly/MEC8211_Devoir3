@@ -1,22 +1,21 @@
 % Données d'entrée
-D = 0.150;             % Diamètre du pilier (m)
-L = 0.300;              % Longueur du pilier (m)
-k = 385;              % Conductivité thermique (W/m.K)
-h = 600;               % Coefficient d'échange thermique (W/m².K)
-T_inf = 25;           % Température ambiante (°C)
-Tm = 700;             % Température à la base (°C)
-Hmin = 0.00030;
-Hmax = 0.00500;
-dH   = 0.00050;          % Taille du maillage
-num_z = 100;
+D = 0.05;             % Diamètre du pilier (m)
+L = 0.4;              % Longueur du pilier (m)
+k = 150;              % Conductivité thermique (W/m.K)
+h = 15;               % Coefficient d'échange thermique (W/m².K)
+T_inf = 300;           % Température ambiante (°C)
+Tm = 400;             % Température à la base (°C)
+Hmin = 0.00020;
+Hmax = 0.00100;
+dH   = 0.00020;          % Taille du maillage
+H_values = Hmin:dH:Hmax;          % Taille du maillage
+num_z = 50;
+Ntot = 50;
 
 % Appeler la fonction FEM avec plot_flag défini sur vrai
 [T_FEM, q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, Hmin, num_z, true);
 
 disp(q_FEM)  % Afficher le flux de chaleur calculé
-
-H_values = Hmin:dH:Hmax;          % Taille du maillage
-Ntot = 100;
 
 [L1_error_T, L2_error_T, Linf_error_T, Erreur_q] = Calcul_normes_erreur_FEM(D, L, k, h, T_inf, Tm, Ntot, H_values, num_z);
 [~, ~, ~, q_analytique] = Solution_numerique_ailette(D, L, k, h, T_inf, Tm, Ntot);
