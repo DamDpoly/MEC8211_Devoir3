@@ -9,6 +9,7 @@ h_mean = 650;     % Coefficient d'échange thermique (W/m².K)
 T_inf_mean = 300; % Température ambiante (°C)
 Tm_mean = 400;   % Température à la base (°C)
 
+%% Création des données d'entrée
 % Incertitudes
 std_D = 0.001;
 std_L = 0.005;
