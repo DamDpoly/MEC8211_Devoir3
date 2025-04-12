@@ -11,13 +11,13 @@ Tm_mean = 400;   % Température à la base (°C)
 
 % Incertitudes
 std_D = 0.010;
-std_L = 0.050;
-std_k = 15;
+std_L = 0.020;
+std_k = 1;
 std_h = 2;
-std_T_inf = 20;
-std_Tm = 20;
+std_T_inf = 2;
+std_Tm = 10;
 
-num_samples = 30000;
+num_samples = 3000;
 
 % Échantillonnage positif
 D_samples     = sample_positive(D_mean, std_D, num_samples);
