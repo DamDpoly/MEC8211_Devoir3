@@ -1,11 +1,11 @@
 % Données d'entrée
-D = 0.4;             % Diamètre du pilier (m)
-L = 0.2;              % Longueur du pilier (m)
-k = 10;              % Conductivité thermique (W/m.K)
-h = 650;               % Coefficient d'échange thermique (W/m².K)
+D = 0.050;             % Diamètre du pilier (m)
+L = 0.400;              % Longueur du pilier (m)
+k = 150;              % Conductivité thermique (W/m.K)
+h = 15;               % Coefficient d'échange thermique (W/m².K)
 T_inf = 300;           % Température ambiante (°C)
 Tm = 400;             % Température à la base (°C)
-Hmin = 0.00080;
+Hmin = 0.00040;
 Hmax = 0.00300;
 dH   = 0.00010;          % Taille du maillage
 H_values = Hmin:dH:Hmax;          % Taille du maillage
