@@ -1,19 +1,19 @@
 clear;
 
 % --- Définition des constantes ---
-D = 0.5;             % Diamètre du pilier (m)
-L = 1;               % Longueur du pilier (m)
-k = 385;             % Conductivité thermique (W/m.K)
-h = 500;             % Coefficient d'échange thermique (W/m².K)
-T_inf = 25;          % Température ambiante (°C)
-Tm = 100;            % Température à la base (°C)
+D = 0.050;             % Diamètre du pilier (m)
+L = 0.400;               % Longueur du pilier (m)
+k = 150;             % Conductivité thermique (W/m.K)
+h = 15;             % Coefficient d'échange thermique (W/m².K)
+T_inf = 300;          % Température ambiante (°C)
+Tm = 400;            % Température à la base (°C)
 
 
 Bi = (h * D) / k;    % Nombre de Biot
 
 
 % Valeurs de Ntot pour les quatres profils de concentration
-Ntot_values = [5, 10, 15, 1000];
+Ntot_values = [5, 10, 15, 500];
 dx_values = L ./ (Ntot_values - 1);
 
 figure;
@@ -23,7 +23,7 @@ for i = 1:length(Ntot_values)
     dx = dx_values(i);
 
     % Appel de la fonction pour obtenir les profils de température et les flux de chaleur
-    [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numerique_ailette(D, L, k, h, T_inf, Tm, Ntot);
+    [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numerique_ailette_schema_1(D, L, k, h, T_inf, Tm, Ntot);
 
     % Affichage des profils de température
     subplot(2, 2, i);

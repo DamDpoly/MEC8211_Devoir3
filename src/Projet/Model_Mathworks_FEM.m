@@ -49,7 +49,7 @@ function [T_FEM, q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, H, num_z, f
     % Définir les positions des tranches axiales (valeurs z pour la moyenne)
     z = linspace(0, L, num_z);
     T_FEM = zeros(length(z), 1);
-    tolerance = 1e-4;
+    tolerance = 5e-4;
     
     % Boucle sur chaque tranche z
     for i = 1:length(z)
