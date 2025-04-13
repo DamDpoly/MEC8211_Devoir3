@@ -1,4 +1,4 @@
-function [T_FEM, q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, H, num_z, flag)
+function [T_FEM, Q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, H, num_z, flag)
     % Définir la géométrie
     g = decsg([3 4 0 0 D/2 D/2 L 0 0 L]');
     
@@ -18,9 +18,9 @@ function [T_FEM, q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, H, num_z, f
     model.FaceLoad = faceLoad(Heat=0);
     
     % Conditions aux limites
-    model.EdgeBC(2) = edgeBC(Temperature=Tm);  % Condition limite de température sur le bord 2
-    model.EdgeLoad(3) = edgeLoad(ConvectionCoefficient=h, AmbientTemperature=T_inf);  % Convection sur le bord 3
-    model.EdgeLoad(4) = edgeLoad(ConvectionCoefficient=h, AmbientTemperature=T_inf);  % Convection sur le bord 4
+    model.EdgeBC(2) = edgeBC(Temperature=Tm);  % Température imposée à la base
+    model.EdgeLoad(3) = edgeLoad(ConvectionCoefficient=h, AmbientTemperature=T_inf);  % Convection latérale
+    model.EdgeLoad(4) = edgeLoad(ConvectionCoefficient=h, AmbientTemperature=T_inf);  % Convection extrémité
 
     % Générer le maillage
     model = generateMesh(model, 'Hmax', H);
@@ -28,43 +28,43 @@ function [T_FEM, q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, H, num_z, f
     % Résoudre le modèle
     result = solve(model);
     
-    % Extraire les résultats de température
+    % Extraire la température
     T = result.Temperature;
     
-    % Visualiser la distribution de température si flag est vrai
     if flag
         figure;
         pdeplot(result.Mesh, XYData=T, Contour="on");
         axis equal;
         title("Température à l'état stationnaire");
+
         figure;
         pdeplot(model.Mesh);
         axis equal;
         title("Maillage FEM");
     end
-    
-    % Stocker les coordonnées des nœuds et les températures dans le maillage
+
+    % Stocker coordonnées et températures
     Mesh = [result.Mesh.Nodes(1,:)', result.Mesh.Nodes(2,:)', T];
-    
-    % Définir les positions des tranches axiales (valeurs z pour la moyenne)
+
+    % Moyenne pondérée selon r pour obtenir un profil axial 1D
     z = linspace(0, L, num_z);
     T_FEM = zeros(length(z), 1);
     tolerance = 5e-4;
-    
-    % Boucle sur chaque tranche z
+
     for i = 1:length(z)
         z_val = z(i);
         nodes_at_z = Mesh(abs(Mesh(:, 2) - z_val) < tolerance, :);
-        
-        % Calcul de la température moyenne pondérée
-        r = nodes_at_z(:, 1);  % Coordonnée radiale
-        T = nodes_at_z(:, 3);  % Température au nœud
-        weighted_sum = sum(r .* T);
+        r = nodes_at_z(:, 1);
+        T_vals = nodes_at_z(:, 3);
+        weighted_sum = sum(r .* T_vals);
         sum_r = sum(r);
-        T_FEM(i) = weighted_sum / sum_r;
+        if sum_r > 0
+            T_FEM(i) = weighted_sum / sum_r;
+        else
+            T_FEM(i) = NaN;
+        end
     end
-    
-    % Tracer le profil de température si flag est vrai
+
     if flag
         figure;
         plot(z, T_FEM);
@@ -73,11 +73,9 @@ function [T_FEM, q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, H, num_z, f
         title('Profil de température le long du cylindre');
     end
 
-    % Calcul du flux de chaleur
+    % Calcul du débit de chaleur total Q [W]
     gradient = (T_FEM(2) - T_FEM(1)) / (z(2) - z(1));
     Ac = (pi * D^2) / 4;
-    q_FEM = -k * Ac * gradient;  % Flux de chaleur
-    
+    Q_FEM = -k * Ac * gradient;  % Puissance thermique [W]
 end
-
 

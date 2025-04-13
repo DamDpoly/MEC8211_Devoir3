@@ -26,7 +26,7 @@ function [L1_error_T, L2_error_T, Linf_error_T, Erreur_q, ...
             Ntot = Ntot_values(idx);
             dx = dx_values(idx);
 
-            [T_numerique, T_analytique, q_num, q_ana] = Solution_numerique_ailette(D, L, k, h, T_inf, Tm, Ntot);
+            [T_numerique, T_analytique, q_num, q_ana] = Solution_numerique_ailette_schema_1(D, L, k, h, T_inf, Tm, Ntot);
 
             erreur_T = abs(T_numerique - T_analytique');
 
@@ -49,7 +49,9 @@ function [L1_error_T, L2_error_T, Linf_error_T, Erreur_q, ...
             H = H_values(idx);
 
             [T_FEM, q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, H, num_z, false);
-            [~, T_analytique_FEM, ~, q_ana_FEM] = Solution_numerique_ailette(D, L, k, h, T_inf, Tm, Ntot_values(end));
+
+            % Use consistent analytic reference (from schema 1)
+            [~, T_analytique_FEM, ~, q_ana_FEM] = Solution_numerique_ailette_schema_1(D, L, k, h, T_inf, Tm, Ntot_values(end));
 
             erreur_T_FEM = abs(T_FEM - T_analytique_FEM');
 
@@ -61,4 +63,3 @@ function [L1_error_T, L2_error_T, Linf_error_T, Erreur_q, ...
         end
     end
 end
-

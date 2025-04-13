@@ -1,4 +1,4 @@
-function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numerique_ailette_schema_1(D, L, k, h, T_inf, Tm, Ntot)
+function [T_numerique, T_analytique, Q_numerique, Q_analytique] = Solution_numerique_ailette_schema_1(D, L, k, h, T_inf, Tm, Ntot)
     % Paramètres géométriques et physiques
     P = pi * D;                     
     Ac = (pi * D^2) / 4;           
@@ -24,9 +24,6 @@ function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numer
     end
 
     % --- Condition de convection à l'extrémité x = L (schéma d'ordre 1) ---
-    % (T_N - T_{N-1}) / dx = -h/k * (T_N - T_inf)
-    % Forme discrétisée : 
-    % (1/dx + h/k) * T_N - (1/dx) * T_{N-1} = h/k * T_inf
     A(Ntot, Ntot-1) = -1/dx;
     A(Ntot, Ntot)   = 1/dx + h/k;
     B(Ntot) = (h/k) * T_inf;
@@ -40,11 +37,11 @@ function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numer
         (((h / (k * m)) * sinh(m * (L - x)) + cosh(m * (L - x))) / ...
          ((h / (k * m)) * sinh(m * L) + cosh(m * L)));
 
-    % --- Flux de chaleur numérique à x = 0 ---
+    % --- Puissance thermique totale à x = 0 (numérique) ---
     gradT_x0_num = (T_numerique(2) - T_numerique(1)) / dx;
-    q_numerique = -k * Ac * gradT_x0_num;
+    Q_numerique = -k * Ac * gradT_x0_num;
 
-    % --- Flux de chaleur analytique à x = 0 ---
+    % --- Puissance thermique totale à x = 0 (analytique) ---
     syms xs ms ys T_infs Tms hs ks real
     T_symb_expr = T_infs + (Tms - T_infs) * ...
         (((hs / (ks * ms)) * sinh(ms * (ys - xs)) + cosh(ms * (ys - xs))) / ...
@@ -53,5 +50,6 @@ function [T_numerique, T_analytique, q_numerique, q_analytique] = Solution_numer
     gradT_x0_ana = double(subs(dTdx, ...
         [xs,    ms,  ys,   T_infs, Tms,  hs,  ks], ...
         [0,     m,   L,    T_inf,  Tm,   h,   k]));
-    q_analytique = -k * Ac * gradT_x0_ana;
+    Q_analytique = -k * Ac * gradT_x0_ana;
 end
+
