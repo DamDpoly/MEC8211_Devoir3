@@ -1,7 +1,12 @@
+%Ce code est une simulation Monte Carlo sur le modèle FEM et FDS avec les
+%valeurs moyennes et les déviations standard spécifiées. Celui-ci permet à
+%la fois de générer l'analyse de sensibilité globale, ainsi que l'analyse
+%de sensibilité local en faisant varier chaque paramètre indépendamment.
+
 clear
 clc
 
-% Données d'entrée
+% Données d'entrée (Cas pour le Biot élevé)
 D_mean = 0.050;  % Diamètre du pilier (m)
 L_mean = 0.400;  % Longueur du pilier (m)
 k_mean = 150;    % Conductivité thermique (W/m.K)
@@ -9,7 +14,7 @@ h_mean = 15;     % Coefficient d'échange thermique (W/m².K)
 T_inf_mean = 300; % Température ambiante (°C)
 Tm_mean = 400;   % Température à la base (°C)
 
-%% Création des données d'entrée
+%% Analyse de sensibilité globale
 % Incertitudes
 std_D = 0.001;
 std_L = 0.005;
@@ -18,7 +23,7 @@ std_h = 2;
 std_T_inf = 2;
 std_Tm = 10;
 
-num_samples = 3000;
+num_samples = 1000;
 
 % Échantillonnage positif
 D_samples     = sample_positive(D_mean, std_D, num_samples);
@@ -56,7 +61,7 @@ for i = 1:num_samples
     Q_FDS_results(i) = Q_FDS;
 end
 
-%% Histogrammes PDF des paramètres d'entrée
+% Histogrammes PDF des paramètres d'entrée
 param_names = {'D', 'L', 'k', 'h', 'T_{inf}', 'T_m'};
 param_samples = {D_samples, L_samples, k_samples, h_samples, T_inf_samples, Tm_samples};
 
@@ -75,7 +80,7 @@ for i = 1:length(param_samples)
     grid on;
 end
 
-%% CDF des paramètres d'entrée
+% CDF des paramètres d'entrée
 figure('Name', 'CDF des paramètres d''entrée');
 for i = 1:length(param_samples)
     subplot(2, 3, i);
@@ -88,7 +93,7 @@ for i = 1:length(param_samples)
     grid on;
 end
 
-%% Analyse de Q_FEM et Q_FDS
+% Analyse de Q_FEM et Q_FDS
 pd_Q_FEM = fitdist(Q_FEM_results, 'Lognormal');
 pd_Q_FDS = fitdist(Q_FDS_results, 'Lognormal');
 
@@ -125,7 +130,7 @@ ylabel('Fonction de répartition');
 legend('FEM','FDS');
 grid on;
 
-%% Construction de la matrice finale pour analyse de sensibilité
+% Construction de la matrice finale pour analyse de sensibilité
 
 % Matrice : [D, L, k, h, T_inf, Tm, Biot, Q_FEM, Q_FDS]
 results_matrix = [ ...
@@ -147,16 +152,85 @@ results_headers = {'D', 'L', 'k', 'h', 'T_inf', 'Tm', 'Biot', 'Q_FEM', 'Q_FDS'};
 disp('Aperçu des 5 premières lignes du tableau résultats :');
 disp(array2table(results_matrix(1:5,:), 'VariableNames', results_headers));
 
-%% Fonction d’échantillonnage positive
+%% Analyse de sensibilité locale
+
+clear
+clc
+
+% Valeurs moyennes
+D_mean     = 0.050;
+L_mean     = 0.400;
+k_mean     = 150;
+h_mean     = 15;
+T_inf_mean = 300;
+Tm_mean    = 400;
+
+% Incertitudes
+std_D     = 0.020;
+std_L     = 0.100;
+std_k     = 50;
+std_h     = 5;
+std_T_inf = 100;
+std_Tm    = 100;
+
+% Nombre d'échantillons par variable
+num_samples = 1000;
+
+% Simulation en faisant varier chaque variable indépendamment
+D_var     = sample_positive(D_mean, std_D, num_samples);
+L_var     = sample_positive(L_mean, std_L, num_samples);
+k_var     = sample_positive(k_mean, std_k, num_samples);
+h_var     = sample_positive(h_mean, std_h, num_samples);
+T_inf_var = sample_positive(T_inf_mean, std_T_inf, num_samples);
+Tm_var    = sample_positive(Tm_mean, std_Tm, num_samples);
+
+% Initialisation des résultats
+Q_D     = zeros(num_samples,1);
+Q_L     = zeros(num_samples,1);
+Q_k     = zeros(num_samples,1);
+Q_h     = zeros(num_samples,1);
+Q_T_inf = zeros(num_samples,1);
+Q_Tm    = zeros(num_samples,1);
+
+for i = 1:num_samples
+    % D variable
+    [~,~,Q_D(i),~] = Solution_numerique_ailette(D_var(i), L_mean, k_mean, h_mean, T_inf_mean, Tm_mean, 150);
+    % L variable
+    [~,~,Q_L(i),~] = Solution_numerique_ailette(D_mean, L_var(i), k_mean, h_mean, T_inf_mean, Tm_mean, 150);
+    % k variable
+    [~,~,Q_k(i),~] = Solution_numerique_ailette(D_mean, L_mean, k_var(i), h_mean, T_inf_mean, Tm_mean, 150);
+    % h variable
+    [~,~,Q_h(i),~] = Solution_numerique_ailette(D_mean, L_mean, k_mean, h_var(i), T_inf_mean, Tm_mean, 150);
+    % T_inf variable
+    [~,~,Q_T_inf(i),~] = Solution_numerique_ailette(D_mean, L_mean, k_mean, h_mean, T_inf_var(i), Tm_mean, 150);
+    % Tm variable
+    [~,~,Q_Tm(i),~] = Solution_numerique_ailette(D_mean, L_mean, k_mean, h_mean, T_inf_mean, Tm_var(i), 150);
+end
+
+% Matrices de résultats (valeur variable + Q)
+results_D     = [D_var     Q_D];
+results_L     = [L_var     Q_L];
+results_k     = [k_var     Q_k];
+results_h     = [h_var     Q_h];
+results_T_inf = [T_inf_var Q_T_inf];
+results_Tm    = [Tm_var    Q_Tm];
+
+% Affichage de contrôle
+disp('Aperçu résultats variation D :');
+disp(array2table(results_D(1:5,:), 'VariableNames', {'D', 'Q'}));
+
+disp('Aperçu résultats variation L :');
+disp(array2table(results_L(1:5,:), 'VariableNames', {'L', 'Q'}));
+
+%% Fonction d’échantillonnage positif > 0.001
 function samples = sample_positive(mean_val, std_val, num_samples)
     samples = zeros(num_samples, 1);
     i = 1;
     while i <= num_samples
         val = normrnd(mean_val, std_val);
-        if val > 0
+        if val > 0.001
             samples(i) = val;
             i = i + 1;
         end
     end
 end
-

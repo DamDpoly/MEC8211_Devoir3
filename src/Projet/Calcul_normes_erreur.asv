@@ -1,7 +1,8 @@
 %Ce code est une fonction calculant les normes d'erreur pour la simulation
 %FDS et la simulation FEM. Les flags sont utilisés pour enlever les calculs
 %de l'un ou de l'autre afin de réduire la quantité de calculs tout en
-%mettant les calculs pour FDS et FEM dans la même fonction.
+%mettant les calculs dans la même fonction.
+
 
 function [L1_error_T, L2_error_T, Linf_error_T, Erreur_q, ...
           L1_error_T_FEM, L2_error_T_FEM, Linf_error_T_FEM, Erreur_q_FEM] = ...
@@ -18,7 +19,7 @@ function [L1_error_T, L2_error_T, Linf_error_T, Erreur_q, ...
     Linf_error_T_FEM = [];
     Erreur_q_FEM = [];
 
-    % --- ERREURS POUR LE MODELE FDS --- %
+    %% --- ERREURS POUR LE MODELE FDS --- %%
     if flag_FDS
         dx_values = L ./ (Ntot_values - 1);
 
@@ -43,7 +44,7 @@ function [L1_error_T, L2_error_T, Linf_error_T, Erreur_q, ...
         end
     end
 
-    % --- ERREURS POUR LE MODELE FEM --- %
+    %% --- ERREURS POUR LE MODELE FEM --- %%
     if flag_FEM
         L1_error_T_FEM = zeros(length(H_values), 1);
         L2_error_T_FEM = zeros(length(H_values), 1);

@@ -1,3 +1,6 @@
+%Ce code est une fonction calculant la solution numérique du schéma FDS
+%pour l'ordre 1 ainsi que la solution analytique
+
 function [T_numerique, T_analytique, Q_numerique, Q_analytique] = Solution_numerique_ailette_schema_1(D, L, k, h, T_inf, Tm, Ntot)
     % Paramètres géométriques et physiques
     P = pi * D;                     

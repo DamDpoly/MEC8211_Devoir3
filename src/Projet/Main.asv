@@ -1,7 +1,5 @@
 %Ce code est sous-divisé en trois parties. La première permet la
-%visualisation des résultats FDS vs le résultat analytique, la deuxième
-%mesure la convergence des deux schémas et de la SRQ pour la FDS, et la
-%troisième calcule la convergence du modèle FEM.
+%visualisation des résultats FDS vs le r
 
 clear;
 clc

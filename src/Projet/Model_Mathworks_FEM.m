@@ -1,3 +1,8 @@
+%Ce code est une adaptation du modèle FEM  de MathWorks disponible en ligne 
+% et faisant usage de PDE Toolbox. Le tutoriel de Mathworks est suivi à la
+% lettre et le code est adapté pour nos variables et conditions limites. 
+
+
 function [T_FEM, Q_FEM] = Model_Mathworks_FEM(D, L, k, h, T_inf, Tm, H, num_z, flag)
     % Définir la géométrie
     g = decsg([3 4 0 0 D/2 D/2 L 0 0 L]');
